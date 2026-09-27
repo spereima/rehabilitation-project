@@ -1,9 +1,9 @@
-dataset_root: "dataset_check"     # Path to the dataset root folder
+dataset_root: "dataset_check_frames"     # Path to the dataset root folder
 dataset_loader: "" # SilsFolderDataset | RGBFolderDataset
 splits: ['train', 'val', 'test'] # The names must match those in the JSON
 split_normalizer: "train"  # split used to calculate the normalization ("train" recommended)
 
-metadata_json: /.../dataset_3d_with_angles.json # Path to the dataset_3d_with_angles.json file
+metadata_json: dataset_check/dataset_3d_with_angles.json # Path to the dataset_3d_with_angles.json file
 modality: ""                              # sils | sils_cropped | rgb | of_gmflow | of_tvl1 | semantic_segmentation
 file_ext: "png"
 frame_zfill: 4                           # number of digits for the frames (p.ej., 0123.jpg -> 4)

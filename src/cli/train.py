@@ -66,7 +66,9 @@ def main(cfg: DictConfig):
         norm_params = json.load(f)
 
     # TODO - Cambiar al que venga de config
-    train_ds = RGBFolderDataset(cfg, active_split="train")
+    # train_ds = RGBFolderDataset(cfg, active_split="train")
+    DatasetClass = SilsFolderDataset if cfg.data.dataset_loader == "SilsFolderDataset" else RGBFolderDataset
+    train_ds = DatasetClass(cfg, active_split="train")
 
     train_loader = DataLoader(
         train_ds,
@@ -156,7 +158,8 @@ def main(cfg: DictConfig):
 
         # Validation
         if cfg.validation.enabled and (epoch % cfg.validation.every_n_epochs == 0 or epoch == cfg.training.epochs):
-            val_ds = RGBFolderDataset(cfg, active_split="val") # TODO - Cambiar al que venga de config
+            # val_ds = RGBFolderDataset(cfg, active_split="val") # TODO - Cambiar al que venga de config
+            val_ds = DatasetClass(cfg, active_split="val")
             val_loader = DataLoader(
                 val_ds,
                 batch_size=cfg.training.batch_size,

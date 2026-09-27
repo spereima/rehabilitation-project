@@ -14,3 +14,8 @@ data:
   split_name: "split_1"
   include_exercises: ['01', '05'] # From 01 to 16
   include_cameras: ["cam0"]   # e.g., ['cam0', 'cam1', ...] or [] for all cameras
+
+model:
+  name: "BaselineSilsModel"
+  backbone: resnet18
+  hidden_dim: 256

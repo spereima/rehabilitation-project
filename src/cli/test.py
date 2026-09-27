@@ -14,6 +14,7 @@ from src.utils.common import set_all_seeds
 from src.models import get_model
 from src.loss import get_loss
 from src.data.rgb_folder_dataset import RGBFolderDataset  # dataset que carga desde CSVs
+from src.data.sils_folder_dataset import SilsFolderDataset
 
 
 # ───────────────────────────── Métricas simples ─────────────────────────────
@@ -45,7 +46,9 @@ def main(cfg: DictConfig):
     test_csv = os.path.join(csv_path, f"{cfg.data.split_name}_test.csv")
     assert os.path.exists(test_csv), f"Manifest CSV no encontrado: {test_csv}"
     
-    test_ds = RGBFolderDataset(cfg, active_split="test")
+    # test_ds = RGBFolderDataset(cfg, active_split="test")
+    DatasetClass = SilsFolderDataset if cfg.data.dataset_loader == "SilsFolderDataset" else RGBFolderDataset
+    test_ds = DatasetClass(cfg, active_split="test")
     test_loader = DataLoader(
         test_ds,
         batch_size=cfg.test.batch_size,

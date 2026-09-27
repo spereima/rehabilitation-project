@@ -21,7 +21,7 @@ validation:
 metrics: ["mae", "rmse"] # Output metrics for train, validation and test
 
 test:
-  checkpoint_epoch: 30 # n || None to use the last epoch of training
+  checkpoint_epoch: 3 # n || None to use the last epoch of training
   batch_size: 8
   num_workers: 4
   device: "cuda"      # "cuda" | "cpu"
