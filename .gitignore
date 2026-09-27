@@ -213,3 +213,4 @@ outputs/
 debug/
 data/manifests/*
 data/splits/*
+dataset_check/

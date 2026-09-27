@@ -1,4 +1,4 @@
-dataset_root: ""     # Path to the dataset root folder
+dataset_root: "dataset_check"     # Path to the dataset root folder
 dataset_loader: "" # SilsFolderDataset | RGBFolderDataset
 splits: ['train', 'val', 'test'] # The names must match those in the JSON
 split_normalizer: "train"  # split used to calculate the normalization ("train" recommended)
