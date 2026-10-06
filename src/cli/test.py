@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torchvision.models as tvm
 from tqdm import tqdm
+import pandas as pd
 
 from src.utils.common import set_all_seeds
 from src.models import get_model
@@ -81,6 +82,7 @@ def main(cfg: DictConfig):
     # Evaluación en test
     all_preds = []
     all_targets = []
+    predictions = []
     with torch.no_grad():
         pbar = tqdm(test_loader, desc="Evaluando en test")
         for i, (x, y_norm, meta) in enumerate(pbar, start=1):
@@ -93,6 +95,17 @@ def main(cfg: DictConfig):
 
             y_denorm = y * norm_params["std"] + norm_params["mean"]
             y_pred_denorm = y_pred * norm_params["std"] + norm_params["mean"]
+            
+            for j in range(x.size(0)):
+                predictions.append({
+                    "subject": int(meta["subject"][j]),
+                    "exercise": int(meta["exercise"][j]),
+                    "camera": meta["camera"][j],
+                    "frame_id": int(meta["frame_id"][j]),
+                    "img_path": meta["img_path"][j],
+                    "angle_gt": float(y_denorm[j]),
+                    "angle_pred": float(y_pred_denorm[j]),
+                })
 
             all_preds.append(y_pred_denorm.cpu())
             all_targets.append(y_denorm.cpu())
@@ -104,6 +117,22 @@ def main(cfg: DictConfig):
     test_rmse = rmse(all_targets, all_preds).item()
 
     print(f"Test results - MAE: {test_mae:.4f}, RMSE: {test_rmse:.4f}")
+    
+    predictions_path = os.path.join(
+        "output",
+        cfg.project.name,
+        cfg.data.modality,
+        cfg.data.split_name,
+        cfg.project.run_name,
+        "test_predictions.csv",
+    )
+
+    pd.DataFrame(predictions).to_csv(
+        predictions_path,
+        index=False,
+    )
+
+    print(f"Test predictions saved to {predictions_path}")
     
 
 if __name__ == "__main__":
