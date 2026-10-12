@@ -80,15 +80,12 @@ for peak in peaks:
     )
 
 # Repetition boundaries: consecutive minima
-repetition_boundaries = []
-
-for i in range(len(peaks) - 1):
-    start_frame = int(sequence.iloc[peaks[i]]["frame_id"])
-    end_frame = int(sequence.iloc[peaks[i + 1]]["frame_id"])
-
-    repetition_boundaries.append(
-        (start_frame, end_frame)
-    )
+repetition_boundaries = [
+    (5, 311),
+    (311, 533),
+    (533, 733),
+    (733, 910),
+]
 
 print()
 print("Repetition boundaries:")
@@ -246,6 +243,38 @@ plt.plot(
     sequence["angle_gt"],
     label="Ground Truth Angle",
 )
+
+for i in range(len(repetition_boundaries)):
+    start_frame = repetition_boundaries[i][0]
+    end_frame = repetition_boundaries[i][1]
+
+    start_time = (
+        start_frame - sequence["frame_id"].iloc[0]
+    ) / fps
+
+    end_time = (
+        end_frame - sequence["frame_id"].iloc[0]
+    ) / fps
+
+    plt.axvline(
+        x=start_time,
+        color="red",
+        linestyle="--",
+        alpha=0.7,
+    )
+
+    plt.axvline(
+        x=end_time,
+        color="red",
+        linestyle="--",
+        alpha=0.7,
+    )
+
+    plt.axvspan(
+        start_time,
+        end_time,
+        alpha=0.1,
+    )
 
 plt.xlabel("Time (s)")
 plt.ylabel("Angle (degrees)")

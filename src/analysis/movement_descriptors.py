@@ -68,10 +68,10 @@ smoothness = sequence["velocity_change"].mean()
 
 # repetition boundaries (frame indices)
 repetition_boundaries = [
-    (35, 287),
-    (287, 520),
-    (520, 736),
-    (736, 944),
+    (5, 311),
+    (311, 533),
+    (533, 733),
+    (733, 910),
 ]
 
 
