@@ -90,8 +90,11 @@ def main(cfg: DictConfig):
             x = x.to(device)  # [B,1,H,W]
             y = y_norm.to(device)  # [B]
 
-            with torch.amp.autocast(device_type=device_str, enabled=cfg.training.amp):
-                y_pred = model(x)  # [B]
+            with torch.amp.autocast(device_type=device_str, enabled=False): #cfg.training.amp):
+                y_pred = model(x)
+
+            y = y.float()
+            y_pred = y_pred.float()
 
             y_denorm = y * norm_params["std"] + norm_params["mean"]
             y_pred_denorm = y_pred * norm_params["std"] + norm_params["mean"]
