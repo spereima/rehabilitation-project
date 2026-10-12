@@ -1,0 +1,11 @@
+subject,exercise,camera,frame_id,img_path,angle_gt,angle_pred,absolute_error
+1,1,cam0,907,dataset_check_frames/semantic_segmentation/1/01/cam0/0907.png,99.13540649414062,140.0,40.864593505859375
+1,1,cam0,910,dataset_check_frames/semantic_segmentation/1/01/cam0/0910.png,99.62625122070312,140.0,40.373748779296875
+1,1,cam0,908,dataset_check_frames/semantic_segmentation/1/01/cam0/0908.png,99.12738800048828,139.0,39.87261199951172
+1,1,cam0,909,dataset_check_frames/semantic_segmentation/1/01/cam0/0909.png,99.18708801269533,139.0,39.81291198730467
+1,1,cam0,906,dataset_check_frames/semantic_segmentation/1/01/cam0/0906.png,99.57042694091795,139.0,39.429573059082045
+1,1,cam0,905,dataset_check_frames/semantic_segmentation/1/01/cam0/0905.png,100.05162048339844,139.0,38.94837951660156
+1,1,cam0,311,dataset_check_frames/semantic_segmentation/1/01/cam0/0311.png,101.0844497680664,140.0,38.915550231933594
+1,1,cam0,310,dataset_check_frames/semantic_segmentation/1/01/cam0/0310.png,101.1052703857422,140.0,38.8947296142578
+1,1,cam0,918,dataset_check_frames/semantic_segmentation/1/01/cam0/0918.png,100.24160766601562,139.0,38.758392333984375
+1,1,cam0,913,dataset_check_frames/semantic_segmentation/1/01/cam0/0913.png,100.41510009765624,139.0,38.584899902343764

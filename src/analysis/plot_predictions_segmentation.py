@@ -1,56 +1,19 @@
 
-import json
 import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
 
 
-run_name = "semantic_segmentation_split1_01_05_cam0"
-
 predictions_path = (
     "output/ucophyrehapp_sample/semantic_segmentation/split_1/"
-    f"{run_name}/train_predictions.csv"
-)
-
-norm_params_path = (
-    "data/manifests/ucophyrehapp_sample/"
-    "semantic_segmentation/split_1/"
-    f"{run_name}/split_1_norm_params.json"
+    "semantic_segmentation_split1_01_05_cam0/test_predictions.csv"
 )
 
 predictions = pd.read_csv(predictions_path)
 
-predictions["subject"] = (
-    predictions["subject"]
-    .str.replace("tensor(", "", regex=False)
-    .str.replace(")", "", regex=False)
-    .astype(int)
-)
-
-predictions["exercise"] = (
-    predictions["exercise"]
-    .str.replace("tensor(", "", regex=False)
-    .str.replace(")", "", regex=False)
-    .astype(int)
-)
-
-with open(norm_params_path, "r") as file:
-    norm_params = json.load(file)
-
-mean = norm_params["mean"]
-std = norm_params["std"]
-
-predictions["angle_gt"] = (
-    predictions["angle_norm_gt"] * std + mean
-)
-
-predictions["angle_pred"] = (
-    predictions["angle_norm_pred"] * std + mean
-)
-
 exercise = 1
-subject = 0
+subject = 1
 camera = "cam0"
 
 sequence = predictions[
@@ -61,16 +24,14 @@ sequence = predictions[
 
 sequence = sequence.sort_values("frame_id")
 
-if sequence.empty:
-    raise ValueError("No predictions found for this sequence.")
-
 sequence["absolute_error"] = abs(
     sequence["angle_pred"] - sequence["angle_gt"]
 )
 
 sequence_mae = sequence["absolute_error"].mean()
 
-output_dir = f"results/{run_name}"
+output_dir = "results/semantic_segmentation_split1_01_05_cam0"
+
 os.makedirs(output_dir, exist_ok=True)
 
 plt.figure(figsize=(12, 6))
@@ -102,7 +63,7 @@ plt.tight_layout()
 plt.savefig(
     os.path.join(
         output_dir,
-        f"ground_truth_vs_predicted_ex{exercise:02d}.png",
+        "ground_truth_vs_predicted_ex01_test.png",
     ),
     dpi=300,
 )

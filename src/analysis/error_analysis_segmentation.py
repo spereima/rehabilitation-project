@@ -1,58 +1,19 @@
 
-import json
 import os
 import shutil
 
 import pandas as pd
 
 
-run_name = "semantic_segmentation_split1_01_05_cam0"
-
 predictions_path = (
     "output/ucophyrehapp_sample/semantic_segmentation/split_1/"
-    f"{run_name}/train_predictions.csv"
-)
-
-norm_params_path = (
-    "data/manifests/ucophyrehapp_sample/"
-    "semantic_segmentation/split_1/"
-    f"{run_name}/split_1_norm_params.json"
+    "semantic_segmentation_split1_01_05_cam0/test_predictions.csv"
 )
 
 predictions = pd.read_csv(predictions_path)
 
-predictions["subject"] = (
-    predictions["subject"]
-    .astype(str)
-    .str.replace("tensor(", "", regex=False)
-    .str.replace(")", "", regex=False)
-    .astype(int)
-)
-
-predictions["exercise"] = (
-    predictions["exercise"]
-    .astype(str)
-    .str.replace("tensor(", "", regex=False)
-    .str.replace(")", "", regex=False)
-    .astype(int)
-)
-
-with open(norm_params_path, "r") as file:
-    norm_params = json.load(file)
-
-mean = norm_params["mean"]
-std = norm_params["std"]
-
-predictions["angle_gt"] = (
-    predictions["angle_norm_gt"] * std + mean
-)
-
-predictions["angle_pred"] = (
-    predictions["angle_norm_pred"] * std + mean
-)
-
 exercise = 1
-subject = 0
+subject = 1
 camera = "cam0"
 
 sequence = predictions[
@@ -74,13 +35,15 @@ largest_errors = sequence.sort_values(
 ).head(10)
 
 output_dir = (
-    f"results/{run_name}/largest_errors"
+    "results/semantic_segmentation_split1_01_05_cam0/"
+    "largest_errors_test"
 )
 
 os.makedirs(output_dir, exist_ok=True)
 
 largest_errors.to_csv(
-    f"results/{run_name}/largest_errors.csv",
+    "results/semantic_segmentation_split1_01_05_cam0/"
+    "largest_errors_test.csv",
     index=False,
 )
 

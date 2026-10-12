@@ -1,60 +1,26 @@
 
-import json
-
-import pandas as pd
-from scipy.signal import find_peaks
-
 import os
 
 import matplotlib.pyplot as plt
-
-
+import pandas as pd
+from scipy.signal import find_peaks
 
 
 run_name = "semantic_segmentation_split1_01_05_cam0"
 
 predictions_path = (
     "output/ucophyrehapp_sample/semantic_segmentation/split_1/"
-    f"{run_name}/train_predictions.csv"
-)
-
-norm_params_path = (
-    "data/manifests/ucophyrehapp_sample/"
-    "semantic_segmentation/split_1/"
-    f"{run_name}/split_1_norm_params.json"
+    f"{run_name}/test_predictions.csv"
 )
 
 predictions = pd.read_csv(predictions_path)
 
-predictions["subject"] = (
-    predictions["subject"]
-    .astype(str)
-    .str.replace("tensor(", "", regex=False)
-    .str.replace(")", "", regex=False)
-    .astype(int)
-)
-
-predictions["exercise"] = (
-    predictions["exercise"]
-    .astype(str)
-    .str.replace("tensor(", "", regex=False)
-    .str.replace(")", "", regex=False)
-    .astype(int)
-)
-
-with open(norm_params_path, "r") as file:
-    norm_params = json.load(file)
-
-mean = norm_params["mean"]
-std = norm_params["std"]
-
-predictions["angle_gt"] = (
-    predictions["angle_norm_gt"] * std + mean
-)
-
 exercise = 1
-subject = 0
+subject = 1
 camera = "cam0"
+
+fps = 30
+delta_t = 1 / fps
 
 sequence = predictions[
     (predictions["exercise"] == exercise)
@@ -67,8 +33,38 @@ sequence = sequence.sort_values("frame_id").reset_index(drop=True)
 if sequence.empty:
     raise ValueError("No predictions found for this sequence.")
 
+sequence["time"] = (
+    sequence["frame_id"] - sequence["frame_id"].iloc[0]
+) / fps
+
+# Ground Truth angle
 angle = sequence["angle_gt"]
 
+# Range of Motion (ROM)
+rom = angle.max() - angle.min()
+
+# Angular velocity
+# Use actual frame gaps if some frames are missing.
+sequence["angular_velocity"] = (
+    angle.diff() / (sequence["frame_id"].diff() / fps)
+)
+
+mean_angular_velocity = (
+    sequence["angular_velocity"].abs().mean()
+)
+
+peak_angular_velocity = (
+    sequence["angular_velocity"].abs().max()
+)
+
+# Smoothness proxy
+sequence["velocity_change"] = (
+    sequence["angular_velocity"].diff().abs()
+)
+
+smoothness = sequence["velocity_change"].mean()
+
+# Detect minima of Ground Truth angle
 peaks, _ = find_peaks(
     -angle,
     distance=100,
@@ -83,43 +79,22 @@ for peak in peaks:
         f"{angle.iloc[peak]:.2f} degrees"
     )
 
+# Repetition boundaries: consecutive minima
+repetition_boundaries = []
 
-fps = 30
-delta_t = 1 / fps
+for i in range(len(peaks) - 1):
+    start_frame = int(sequence.iloc[peaks[i]]["frame_id"])
+    end_frame = int(sequence.iloc[peaks[i + 1]]["frame_id"])
 
-sequence["time"] = (
-    sequence["frame_id"] - sequence["frame_id"].iloc[0]
-) / fps
+    repetition_boundaries.append(
+        (start_frame, end_frame)
+    )
 
+print()
+print("Repetition boundaries:")
+print(repetition_boundaries)
 
-rom = angle.max() - angle.min()
-
-sequence["angular_velocity"] = (
-    angle.diff() / delta_t
-)
-
-mean_angular_velocity = (
-    sequence["angular_velocity"].abs().mean()
-)
-
-peak_angular_velocity = (
-    sequence["angular_velocity"].abs().max()
-)
-
-sequence["velocity_change"] = (
-    sequence["angular_velocity"].diff().abs()
-)
-
-smoothness = sequence["velocity_change"].mean()
-
-
-repetition_boundaries = [
-    (5, 164),
-    (164, 320),
-    (320, 462),
-    (462, 624),
-]
-
+# Repetition descriptors
 repetitions = []
 
 for i in range(len(repetition_boundaries)):
@@ -139,7 +114,8 @@ for i in range(len(repetition_boundaries)):
     )
 
     repetition_velocity = (
-        repetition_angle.diff() / delta_t
+        repetition_angle.diff()
+        / (repetition["frame_id"].diff() / fps)
     )
 
     repetition_peak_velocity = (
@@ -171,7 +147,11 @@ repetitions_df = pd.DataFrame(repetitions)
 
 print()
 print("Repetition descriptors:")
-print(repetitions_df.to_string(index=False))
+
+if repetitions_df.empty:
+    print("Not enough detected minima for complete repetitions.")
+else:
+    print(repetitions_df.to_string(index=False))
 
 print()
 print(f"Exercise: {exercise:02d}")
@@ -179,48 +159,60 @@ print(f"Subject: {subject}")
 print(f"Camera: {camera}")
 print(f"Frames: {len(sequence)}")
 print(f"FPS: {fps}")
+print()
 
 print(f"ROM: {rom:.2f} degrees")
+
 print(
     f"Mean angular velocity: "
     f"{mean_angular_velocity:.2f} degrees/s"
 )
+
 print(
     f"Peak angular velocity: "
     f"{peak_angular_velocity:.2f} degrees/s"
 )
+
 print(
     f"Smoothness proxy: "
     f"{smoothness:.2f} degrees/s"
 )
 
+# Save results
 output_dir = (
     "results/semantic_segmentation_split1_01_05_cam0/"
-    "movement_descriptors"
+    "movement_descriptors_test"
 )
 
 os.makedirs(output_dir, exist_ok=True)
 
 repetitions_df.to_csv(
-    os.path.join(output_dir, "repetition_descriptors.csv"),
+    os.path.join(
+        output_dir,
+        "repetition_descriptors.csv",
+    ),
     index=False,
 )
 
-first_last = pd.concat(
-    [
-        repetitions_df.iloc[[0]],
-        repetitions_df.iloc[[-1]],
-    ]
-)
+if len(repetitions_df) >= 2:
+    first_last = pd.concat(
+        [
+            repetitions_df.iloc[[0]],
+            repetitions_df.iloc[[-1]],
+        ]
+    )
 
-first_last.to_csv(
-    os.path.join(output_dir, "first_vs_last_repetition.csv"),
-    index=False,
-)
+    first_last.to_csv(
+        os.path.join(
+            output_dir,
+            "first_vs_last_repetition.csv",
+        ),
+        index=False,
+    )
 
-print()
-print("First vs last repetition:")
-print(first_last.to_string(index=False))
+    print()
+    print("First vs last repetition:")
+    print(first_last.to_string(index=False))
 
 descriptors = pd.DataFrame(
     [
@@ -239,7 +231,10 @@ descriptors = pd.DataFrame(
 )
 
 descriptors.to_csv(
-    os.path.join(output_dir, "movement_descriptors.csv"),
+    os.path.join(
+        output_dir,
+        "movement_descriptors.csv",
+    ),
     index=False,
 )
 
@@ -254,6 +249,7 @@ plt.plot(
 
 plt.xlabel("Time (s)")
 plt.ylabel("Angle (degrees)")
+
 plt.title(
     f"Ground Truth Angle Over Time | "
     f"Exercise {exercise:02d}, {camera}, Subject {subject}"
@@ -264,7 +260,10 @@ plt.legend()
 plt.tight_layout()
 
 plt.savefig(
-    os.path.join(output_dir, "angle_over_time.png"),
+    os.path.join(
+        output_dir,
+        "angle_over_time.png",
+    ),
     dpi=300,
 )
 
@@ -283,6 +282,7 @@ plt.axhline(y=0, linewidth=1)
 
 plt.xlabel("Time (s)")
 plt.ylabel("Angular velocity (degrees/s)")
+
 plt.title(
     f"Angular Velocity Over Time | "
     f"Exercise {exercise:02d}, {camera}, Subject {subject}"
@@ -293,7 +293,10 @@ plt.legend()
 plt.tight_layout()
 
 plt.savefig(
-    os.path.join(output_dir, "angular_velocity_over_time.png"),
+    os.path.join(
+        output_dir,
+        "angular_velocity_over_time.png",
+    ),
     dpi=300,
 )
 
