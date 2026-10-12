@@ -1,0 +1,20 @@
+
+# @package _global_
+
+project:
+  name: ucophyrehapp_sample
+  run_name: semantic_segmentation_split1_01_05_cam0
+
+data:
+  modality: "semantic_segmentation"
+  channels: 3
+  dataset_loader: "RGBFolderDataset"
+  split_path: "data/splits/split_1_80_10_10.json"
+  split_name: "split_1"
+  include_exercises: ['01', '05']
+  include_cameras: ["cam0"]
+
+model:
+  name: "BaselineRGBModel"
+  backbone: resnet18
+  hidden_dim: 256
