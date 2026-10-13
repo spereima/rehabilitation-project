@@ -41,8 +41,12 @@ def main(cfg: DictConfig):
         inc_cam  = set(cfg.data.include_cameras) if cfg.data.include_cameras else None
 
         # Sujetos permitidos = intersección entre split y filtro opcional (si lo hay)
+        # if inc_subj is not None:
+        #     allowed_subjects = inc_subj
+        # else:
+        #     allowed_subjects = split_subjects
         if inc_subj is not None:
-            allowed_subjects = inc_subj
+            allowed_subjects = split_subjects & inc_subj
         else:
             allowed_subjects = split_subjects
 

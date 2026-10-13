@@ -1,0 +1,14 @@
+# @package _global_
+
+project:
+  name: project_name
+  run_name: full_dataset
+
+data:
+  split_path: "data/splits/split_2_27_subjects.json"
+  split_name: "split_2"
+  include_subjects: []
+  include_exercises: ['01', '05']
+  include_cameras: ['cam0']
+  splits: ['train', 'val', 'test']
+  split_normalizer: train

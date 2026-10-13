@@ -89,6 +89,7 @@ def main(cfg: DictConfig):
     loss_fn = get_loss(cfg.loss)
 
     # Loop de entrenamiento
+    best_val_mae = float("inf")
     for epoch in range(1, cfg.training.epochs + 1):
         model.train()
         running = {"loss": 0.0, "mae": 0.0, "rmse": 0.0}
@@ -113,12 +114,14 @@ def main(cfg: DictConfig):
             # Desnormalizar y calcular las métricas
             with torch.no_grad():
                 y_denorm = y * norm_params["std"] + norm_params["mean"]
-                y_pred_denorm = y_pred * norm_params["std"] + norm_params["mean"]
+                # y_pred_denorm = y_pred * norm_params["std"] + norm_params["mean"]
+                y_pred_denorm = y_pred.float() * norm_params["std"] + norm_params["mean"]
 
                 mae_v = mae(y_denorm, y_pred_denorm)
                 rmse_v = rmse(y_denorm, y_pred_denorm)
 
-            running["loss"]  += float(loss)
+            # running["loss"]  += float(loss)
+            running["loss"] += loss.detach().item()
             running["mae"]   += float(mae_v)
             running["rmse"]  += float(rmse_v)
 
@@ -182,20 +185,50 @@ def main(cfg: DictConfig):
 
                     # Desnormalizar y calcular las métricas
                     y_val_denorm = y_val * norm_params["std"] + norm_params["mean"]
-                    y_val_pred_denorm = y_val_pred * norm_params["std"] + norm_params["mean"]
+                    # y_val_pred_denorm = y_val_pred * norm_params["std"] + norm_params["mean"]
+                    y_val_pred_denorm = y_val_pred.float() * norm_params["std"] + norm_params["mean"]
 
                     val_mae_v = mae(y_val_denorm, y_val_pred_denorm)
                     val_rmse_v = rmse(y_val_denorm, y_val_pred_denorm)
 
                     val_running["loss"] += float(val_loss)
-                    val_running["mae"] += float(val_mae_v)
+                    # val_running["mae"] += float(val_mae_v)
+                    val_running["mae"] += float(val_mae_v) * x_val.size(0)
                     val_running["rmse"] += float(val_rmse_v)
 
             n_val_batches = len(val_loader)
+            current_val_mae = val_running["mae"] / len(val_ds)
             print(f"[validation] Epoch {epoch}: Loss={val_running['loss']/n_val_batches:.4f}, "
-                  f"MAE={val_running['mae']/n_val_batches:.3f}, RMSE={val_running['rmse']/n_val_batches:.3f}")
+                #   f"MAE={val_running['mae']/n_val_batches:.3f}, RMSE={val_running['rmse']/n_val_batches:.3f}")
+                f"MAE={current_val_mae:.3f}, RMSE={val_running['rmse']/n_val_batches:.3f}")
+            # current_val_mae = val_running["mae"] / n_val_batches
+            
 
-    print("Entrenamiento finalizado.")
+            if current_val_mae < best_val_mae:
+                best_val_mae = current_val_mae
+
+                best_ckpt_dir = os.path.join(
+                    "output",
+                    cfg.project.name,
+                    cfg.data.modality,
+                    cfg.data.split_name,
+                    cfg.project.run_name,
+                    "checkpoints"
+                )
+                os.makedirs(best_ckpt_dir, exist_ok=True)
+
+                best_ckpt_path = os.path.join(best_ckpt_dir, "best.pth")
+
+                torch.save({
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": opt.state_dict(),
+                    "scaler_state_dict": scaler.state_dict(),
+                    "best_val_mae": best_val_mae,
+                }, best_ckpt_path)
+
+                print(f"[save] best checkpoint -> {best_ckpt_path}, MAE={best_val_mae:.3f}")
+
 
     # Guardar predicciones del entrenamiento
     preds = []
@@ -222,6 +255,7 @@ def main(cfg: DictConfig):
     os.makedirs(preds_path, exist_ok=True)
     pd.DataFrame(preds).to_csv(os.path.join(preds_path, 'train_predictions.csv'), index=True)
     print(f"[save] predictions -> {preds_path}")
+    print("Entrenamiento finalizado.")
 
     # Close log file
     sys.stdout.close()

@@ -69,15 +69,39 @@ def main(cfg: DictConfig):
 
     # Cargar modelo desde checkpoint
     model = get_model(cfg.model)
-    epoch = cfg.test.checkpoint_epoch if cfg.test.checkpoint_epoch is not None else cfg.training.epochs
-    ckpt_path = os.path.join("output", cfg.project.name, cfg.data.modality, cfg.data.split_name, cfg.project.run_name, "checkpoints", f"epoch_{epoch}.pth")
-    assert os.path.exists(ckpt_path), f"Checkpoint no encontrado: {ckpt_path}"
-
-    # ckpt = torch.load(ckpt_path, map_location=device)
     model = model(cfg.model).to(device)
-    model.load_state_dict(torch.load(ckpt_path)["model_state_dict"])
+    # epoch = cfg.test.checkpoint_epoch if cfg.test.checkpoint_epoch is not None else cfg.training.epochs
+    # ckpt_path = os.path.join("output", cfg.project.name, cfg.data.modality, cfg.data.split_name, cfg.project.run_name, "checkpoints", f"epoch_{epoch}.pth")
+    # assert os.path.exists(ckpt_path), f"Checkpoint no encontrado: {ckpt_path}"
+
+    # # ckpt = torch.load(ckpt_path, map_location=device)
+    # model = model(cfg.model).to(device)
+    # model.load_state_dict(torch.load(ckpt_path)["model_state_dict"])
+    # model.eval()
+    # print(f"Model checkpoint epoch {epoch}.")
+    ckpt_path = os.path.join(
+        "output",
+        cfg.project.name,
+        cfg.data.modality,
+        cfg.data.split_name,
+        cfg.project.run_name,
+        "checkpoints",
+        "best.pth"
+    )
+
+    assert os.path.exists(ckpt_path), f"Checkpoint not found: {ckpt_path}"
+
+    checkpoint = torch.load(
+        ckpt_path,
+        map_location=device,
+        weights_only=True
+    )
+
+    model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
-    print(f"Model checkpoint epoch {epoch}.")
+
+    print(f"Loaded best checkpoint from epoch {checkpoint['epoch']}")
+    print(f"Best validation MAE: {checkpoint['best_val_mae']:.3f}°")
 
     # Evaluación en test
     all_preds = []

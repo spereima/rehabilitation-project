@@ -51,7 +51,16 @@ for subj_dir in "$IN_MOD_DIR"/*; do
 
   for ex_dir in "$subj_dir"/*; do
     [[ -d "$ex_dir" ]] || continue
+    # ex_id="$(basename "$ex_dir")"
+
+    # # Find MP4 files
+    # videos=( "$ex_dir"/*.mp4 )
     ex_id="$(basename "$ex_dir")"
+
+    # Process only exercises 01 and 05
+    if [[ "$ex_id" != "01" && "$ex_id" != "05" ]]; then
+      continue
+    fi
 
     # Find MP4 files
     videos=( "$ex_dir"/*.mp4 )
@@ -61,8 +70,15 @@ for subj_dir in "$IN_MOD_DIR"/*; do
     fi
 
     for video_path in "${videos[@]}"; do
+      # cam_file="$(basename "$video_path")"
+      # cam_id="${cam_file%.mp4}"
       cam_file="$(basename "$video_path")"
       cam_id="${cam_file%.mp4}"
+
+      # Process only cam0
+      if [[ "$cam_id" != "cam0" ]]; then
+        continue
+      fi
 
       # Output structure:
       # <OUTPUT_ROOT>/<MODALITY>/<subject_id>/<exercise_id>/<cam_id>/*.png
