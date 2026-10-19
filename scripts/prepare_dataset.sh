@@ -57,10 +57,10 @@ for subj_dir in "$IN_MOD_DIR"/*; do
     # videos=( "$ex_dir"/*.mp4 )
     ex_id="$(basename "$ex_dir")"
 
-    # Process only exercises 01 and 05
-    if [[ "$ex_id" != "01" && "$ex_id" != "05" ]]; then
-      continue
-    fi
+    # Process only exercises 01 and 05, + 02 and 06
+    # if [[ "$ex_id" != "01" && "$ex_id" != "02" && "$ex_id" != "05" && "$ex_id" != "06" ]]; then
+    #   continue
+    # fi
 
     # Find MP4 files
     videos=( "$ex_dir"/*.mp4 )

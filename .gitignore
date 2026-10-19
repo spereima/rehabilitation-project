@@ -215,3 +215,18 @@ data/manifests/*
 data/splits/*
 dataset_check/
 dataset_check_old/
+
+# Generated dataset frames
+dataset_check_frames/
+**/dataset_check_frames/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+venv/
+
+# macOS
+.DS_Store

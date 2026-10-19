@@ -1,0 +1,8 @@
+streamlit>=1.40
+opencv-python
+numpy
+pandas
+Pillow
+torch
+torchvision
+omegaconf

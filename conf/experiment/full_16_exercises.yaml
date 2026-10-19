@@ -1,0 +1,30 @@
+# @package _global_
+
+project:
+  name: project_name
+  run_name: full_16_exercises_cam0
+
+data:
+  split_path: "data/splits/split_2_27_subjects.json"
+  split_name: "split_2"
+  include_subjects: []
+  include_exercises:
+    - "01"
+    - "02"
+    - "03"
+    - "04"
+    - "05"
+    - "06"
+    - "07"
+    - "08"
+    - "09"
+    - "10"
+    - "11"
+    - "12"
+    - "13"
+    - "14"
+    - "15"
+    - "16"
+  include_cameras: ["cam0"]
+  splits: ["train", "val", "test"]
+  split_normalizer: train

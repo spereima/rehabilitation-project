@@ -43,8 +43,17 @@ def main(cfg: DictConfig):
     
     set_all_seeds(cfg.training.seed)
 
-    device = torch.device(cfg.training.device if torch.cuda.is_available() else "cpu")
-    device_str = "cuda" if device.type == "cuda" else "cpu"
+    # device = torch.device(cfg.training.device if torch.cuda.is_available() else "cpu")
+    # device_str = "cuda" if device.type == "cuda" else "cpu"
+    if cfg.training.device == "cuda" and torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif cfg.training.device == "mps" and torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
+    device_str = device.type
+    print(f"Using device: {device}")
 
     # Create Tensorboard object
     if cfg.logging.tensorboard_log:
@@ -83,14 +92,48 @@ def main(cfg: DictConfig):
     model = get_model(cfg.model)
     model = model(cfg.model).to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=cfg.training.lr, weight_decay=cfg.training.weight_decay)
-    scaler = torch.amp.GradScaler(enabled=cfg.training.amp)
+    # scaler = torch.amp.GradScaler(enabled=cfg.training.amp)
+    scaler = torch.amp.GradScaler(
+        "cuda",
+        enabled=cfg.training.amp and device.type == "cuda"
+    )
 
     # Loss function
     loss_fn = get_loss(cfg.loss)
 
     # Loop de entrenamiento
+    # best_val_mae = float("inf")
+    # for epoch in range(1, cfg.training.epochs + 1):
     best_val_mae = float("inf")
-    for epoch in range(1, cfg.training.epochs + 1):
+    start_epoch = 1
+
+    checkpoint_path = os.path.join(
+        "output",
+        cfg.project.name,
+        cfg.data.modality,
+        cfg.data.split_name,
+        cfg.project.run_name,
+        "checkpoints",
+        "best.pth"
+    )
+
+    if os.path.exists(checkpoint_path):
+        checkpoint = torch.load(
+            checkpoint_path,
+            map_location=device,
+            weights_only=False
+        )
+
+        model.load_state_dict(checkpoint["model_state_dict"])
+        opt.load_state_dict(checkpoint["optimizer_state_dict"])
+        scaler.load_state_dict(checkpoint["scaler_state_dict"])
+
+        start_epoch = checkpoint["epoch"] + 1
+        best_val_mae = checkpoint["best_val_mae"]
+
+        print(f"Resuming training from epoch {start_epoch}")
+
+    for epoch in range(start_epoch, cfg.training.epochs + 1):
         model.train()
         running = {"loss": 0.0, "mae": 0.0, "rmse": 0.0}
         pbar = tqdm(train_loader, desc=f"Epoch {epoch}/{cfg.training.epochs}")
@@ -100,7 +143,11 @@ def main(cfg: DictConfig):
             y = y_norm.to(device).float()   # target ya normalizado
 
             opt.zero_grad(set_to_none=True)
-            with torch.amp.autocast(device_type=device_str, enabled=cfg.training.amp):
+            # with torch.amp.autocast(device_type=device_str, enabled=cfg.training.amp):
+            with torch.amp.autocast(
+                device_type=device_str,
+                enabled=cfg.training.amp and device.type == "cuda"
+            ):
                 y_pred = model(x)
                 loss = loss_fn(y_pred, y)
 
@@ -179,7 +226,11 @@ def main(cfg: DictConfig):
                     x_val = x_val.to(device)
                     y_val = y_val_norm.to(device).float()
 
-                    with torch.amp.autocast(device_type=device_str, enabled=cfg.training.amp):
+                    # with torch.amp.autocast(device_type=device_str, enabled=cfg.training.amp):
+                    with torch.amp.autocast(
+                        device_type=device_str,
+                        enabled=cfg.training.amp and device.type == "cuda"
+                    ):
                         y_val_pred = model(x_val)
                         val_loss = F.mse_loss(y_val_pred, y_val)
 

@@ -38,8 +38,17 @@ def main(cfg: DictConfig):
     print("CONFIG:\n", OmegaConf.to_yaml(cfg))
     set_all_seeds(cfg.training.seed)
 
-    device = torch.device(cfg.training.device if torch.cuda.is_available() else "cpu")
-    device_str = "cuda" if device.type == "cuda" else "cpu"
+    # device = torch.device(cfg.training.device if torch.cuda.is_available() else "cpu")
+    # device_str = "cuda" if device.type == "cuda" else "cpu"
+    if cfg.training.device == "cuda" and torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif cfg.training.device == "mps" and torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+
+    device_str = device.type
+    print(f"Using device: {device}")
 
     # Dataset de entrenamiento (ya normalizado)
     manifests_dir = 'data/manifests'
