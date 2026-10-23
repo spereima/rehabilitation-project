@@ -219,6 +219,7 @@ dataset_check_old/
 # Generated dataset frames
 dataset_check_frames/
 **/dataset_check_frames/
+dataset_check_frames_small/
 
 # Python cache
 __pycache__/
