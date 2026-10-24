@@ -1,0 +1,88 @@
+CONFIG:
+ data:
+  dataset_root: dataset_check_frames_small
+  dataset_loader: RGBFolderDataset
+  splits:
+  - train
+  - val
+  split_normalizer: train
+  metadata_json: dataset_check/dataset_3d_with_angles.json
+  modality: semantic_segmentation
+  file_ext: png
+  frame_zfill: 4
+  image_size:
+  - 224
+  - 224
+  T: 32
+  channels: 3
+  stride: 8
+  include_subjects: []
+  include_exercises: []
+  include_cameras:
+  - cam0
+  - cam1
+  - cam2
+  - cam3
+  - cam4
+  subject_to_folder:
+    type: identity
+  normalization:
+    function: zscore
+  split_path: data/splits/cross_validation/fold_1.json
+  split_name: fold_1
+model:
+  name: BaselineRGBModel
+  backbone: resnet18
+  hidden_dim: 256
+training:
+  seed: 42
+  epochs: 10
+  batch_size: 16
+  num_workers: 2
+  lr: 0.0001
+  weight_decay: 0.05
+  amp: true
+  grad_clip: 1.0
+  device: cuda
+  checkpoint_save_every: 10
+loss:
+  loss: mse
+project:
+  name: ucophyrehab_5fold
+  run_name: semantic_segmentation_fold_1
+validation:
+  enabled: true
+  every_n_epochs: 1
+metrics:
+- mae
+- rmse
+test:
+  checkpoint_epoch: 3
+  batch_size: 8
+  num_workers: 4
+  device: cuda
+logging:
+  runs_dir: runs
+  print_every: 50
+  tensorboard_log: false
+experiment: {}
+
+Using device: cuda
+Resuming training from epoch 4
+[train] Epoch 4: Loss=0.0046, MAE=1.477, RMSE=1.912
+[validation] Epoch 4: Loss=0.1978, MAE=9.810, RMSE=10.046
+[train] Epoch 5: Loss=0.0041, MAE=1.339, RMSE=1.739
+[validation] Epoch 5: Loss=0.1644, MAE=9.190, RMSE=9.420
+[train] Epoch 6: Loss=0.0035, MAE=1.247, RMSE=1.617
+[validation] Epoch 6: Loss=0.1701, MAE=9.436, RMSE=9.652
+[train] Epoch 7: Loss=0.0027, MAE=1.164, RMSE=1.498
+[validation] Epoch 7: Loss=0.1384, MAE=8.496, RMSE=8.746
+[save] best checkpoint -> output/ucophyrehab_5fold/semantic_segmentation/fold_1/semantic_segmentation_fold_1/checkpoints/best.pth, MAE=8.496
+[train] Epoch 8: Loss=0.0025, MAE=1.099, RMSE=1.419
+[validation] Epoch 8: Loss=0.1412, MAE=8.597, RMSE=8.830
+[train] Epoch 9: Loss=0.0027, MAE=1.063, RMSE=1.378
+[validation] Epoch 9: Loss=0.1519, MAE=8.879, RMSE=9.118
+[train] Epoch 10: Loss=0.0021, MAE=1.020, RMSE=1.313
+[save] checkpoint -> output/ucophyrehab_5fold/semantic_segmentation/fold_1/semantic_segmentation_fold_1/checkpoints/epoch_10.pth
+[validation] Epoch 10: Loss=0.1446, MAE=8.724, RMSE=8.963
+CV_FINISHED

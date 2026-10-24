@@ -1,0 +1,3 @@
+modality,folds,mean_best_logged_mae,std_best_logged_mae,mean_best_logged_rmse,std_best_logged_rmse,complete_logs
+semantic_segmentation,5,7.9462,0.5965703646679077,8.2,0.599463510148866,4
+sils,5,8.650400000000001,0.9541893417975276,8.9226,0.955907579214644,4

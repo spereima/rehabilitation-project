@@ -1,0 +1,94 @@
+CONFIG:
+ data:
+  dataset_root: dataset_check_frames_small
+  dataset_loader: SilsFolderDataset
+  splits:
+  - train
+  - val
+  split_normalizer: train
+  metadata_json: dataset_check/dataset_3d_with_angles.json
+  modality: sils
+  file_ext: png
+  frame_zfill: 4
+  image_size:
+  - 224
+  - 224
+  T: 32
+  channels: 1
+  stride: 8
+  include_subjects: []
+  include_exercises: []
+  include_cameras:
+  - cam0
+  - cam1
+  - cam2
+  - cam3
+  - cam4
+  subject_to_folder:
+    type: identity
+  normalization:
+    function: zscore
+  split_path: data/splits/cross_validation/fold_3.json
+  split_name: fold_3
+model:
+  name: BaselineSilsModel
+  backbone: resnet18
+  hidden_dim: 256
+training:
+  seed: 42
+  epochs: 10
+  batch_size: 16
+  num_workers: 2
+  lr: 0.0001
+  weight_decay: 0.05
+  amp: true
+  grad_clip: 1.0
+  device: cuda
+  checkpoint_save_every: 10
+loss:
+  loss: mse
+project:
+  name: ucophyrehab_5fold
+  run_name: sils_fold_3
+validation:
+  enabled: true
+  every_n_epochs: 1
+metrics:
+- mae
+- rmse
+test:
+  checkpoint_epoch: 3
+  batch_size: 8
+  num_workers: 4
+  device: cuda
+logging:
+  runs_dir: runs
+  print_every: 50
+  tensorboard_log: false
+experiment: {}
+
+Using device: cuda
+[train] Epoch 1: Loss=0.0379, MAE=3.707, RMSE=4.718
+[validation] Epoch 1: Loss=0.1820, MAE=8.424, RMSE=8.797
+[save] best checkpoint -> output/ucophyrehab_5fold/sils/fold_3/sils_fold_3/checkpoints/best.pth, MAE=8.424
+[train] Epoch 2: Loss=0.0082, MAE=1.950, RMSE=2.517
+[validation] Epoch 2: Loss=0.2273, MAE=9.426, RMSE=9.802
+[train] Epoch 3: Loss=0.0056, MAE=1.591, RMSE=2.058
+[validation] Epoch 3: Loss=0.1784, MAE=8.310, RMSE=8.654
+[save] best checkpoint -> output/ucophyrehab_5fold/sils/fold_3/sils_fold_3/checkpoints/best.pth, MAE=8.310
+[train] Epoch 4: Loss=0.0040, MAE=1.374, RMSE=1.772
+[validation] Epoch 4: Loss=0.1986, MAE=8.964, RMSE=9.314
+[train] Epoch 5: Loss=0.0034, MAE=1.243, RMSE=1.604
+[validation] Epoch 5: Loss=0.1753, MAE=8.529, RMSE=8.852
+[train] Epoch 6: Loss=0.0027, MAE=1.146, RMSE=1.471
+[validation] Epoch 6: Loss=0.1904, MAE=8.755, RMSE=9.087
+[train] Epoch 7: Loss=0.0024, MAE=1.069, RMSE=1.374
+[validation] Epoch 7: Loss=0.1822, MAE=8.664, RMSE=9.023
+[train] Epoch 8: Loss=0.0025, MAE=1.022, RMSE=1.322
+[validation] Epoch 8: Loss=0.1787, MAE=8.514, RMSE=8.841
+[train] Epoch 9: Loss=0.0020, MAE=0.955, RMSE=1.232
+[validation] Epoch 9: Loss=0.1799, MAE=8.717, RMSE=9.043
+[train] Epoch 10: Loss=0.0020, MAE=0.921, RMSE=1.190
+[save] checkpoint -> output/ucophyrehab_5fold/sils/fold_3/sils_fold_3/checkpoints/epoch_10.pth
+[validation] Epoch 10: Loss=0.2007, MAE=8.893, RMSE=9.222
+CV_FINISHED

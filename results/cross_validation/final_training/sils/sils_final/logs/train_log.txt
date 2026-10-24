@@ -1,0 +1,73 @@
+CONFIG:
+ data:
+  dataset_root: dataset_check_frames_small
+  dataset_loader: SilsFolderDataset
+  splits:
+  - train
+  split_normalizer: train
+  metadata_json: dataset_check/dataset_3d_with_angles.json
+  modality: sils
+  file_ext: png
+  frame_zfill: 4
+  image_size:
+  - 224
+  - 224
+  T: 32
+  channels: 1
+  stride: 8
+  include_subjects: []
+  include_exercises: []
+  include_cameras:
+  - cam0
+  - cam1
+  - cam2
+  - cam3
+  - cam4
+  subject_to_folder:
+    type: identity
+  normalization:
+    function: zscore
+  split_path: data/splits/cross_validation/final_train.json
+  split_name: final_train
+model:
+  name: BaselineSilsModel
+  backbone: resnet18
+  hidden_dim: 256
+training:
+  seed: 42
+  epochs: 3
+  batch_size: 16
+  num_workers: 2
+  lr: 0.0001
+  weight_decay: 0.05
+  amp: true
+  grad_clip: 1.0
+  device: cuda
+  checkpoint_save_every: 1
+loss:
+  loss: mse
+project:
+  name: ucophyrehab_final
+  run_name: sils_final
+validation:
+  enabled: false
+  every_n_epochs: 10
+metrics:
+- mae
+- rmse
+test:
+  checkpoint_epoch: 3
+  batch_size: 8
+  num_workers: 4
+  device: cuda
+logging:
+  runs_dir: runs
+  print_every: 50
+  tensorboard_log: false
+experiment: {}
+
+Using device: cuda
+Resuming from epoch 3
+[train] Epoch 3: Loss=0.0051, MAE=1.550, RMSE=2.007
+[save] checkpoint -> output/ucophyrehab_final/sils/final_train/sils_final/checkpoints/epoch_3.pth
+FINAL_FINISHED

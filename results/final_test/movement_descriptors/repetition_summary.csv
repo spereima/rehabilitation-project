@@ -1,0 +1,3 @@
+modality,repetitions,mean_rom_error,median_rom_error
+semantic_segmentation,374,12.04423172967589,8.761650345054662
+sils,374,15.68551781374773,11.968182767607502

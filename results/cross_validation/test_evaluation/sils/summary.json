@@ -1,0 +1,7 @@
+{
+    "modality": "sils",
+    "test_frames": 223335,
+    "test_mae": 12.788462800829098,
+    "test_rmse": 18.3083126572653,
+    "checkpoint_epoch": 3
+}
