@@ -1,14 +1,12 @@
 import os
 from pathlib import Path
 
-BASE = Path(r'C:\Users\po\OneDrive - UCU\Desktop\ai project reabilitation\current\rehabilitation-project\data_check\semantic_segmentation\semantic_segmentation')
-
-SUBJECTS = [7, 8, 23, 0, 3, 20]
+ROOT = Path(__file__).resolve().parents[2]
+BASE = Path(os.getenv('REHAB_DATA_DIR', ROOT / 'data_check' / 'semantic_segmentation' / 'semantic_segmentation'))
+OUTPUT = Path(os.getenv('REHAB_OUTPUT_DIR', ROOT / 'src' / 'geometric_algorithm' / 'results_all'))
+SUBJECTS = list(range(27))
 EXERCISES = [f'{i:02d}' for i in range(1, 17)]
 CAMERAS = [f'cam{i}' for i in range(5)]
-ROOT = Path(__file__).resolve().parent.parent
-BASE = Path(os.getenv("REHAB_DATA_DIR", ROOT / "data" / "semantic_segmentation"))
-OUTPUT = Path(os.getenv("REHAB_OUTPUT_DIR", ROOT / "results" / "geometric"))
 WORKERS = 2
 SAVE_IMAGES = False
 SAVE_EVERY = 90
