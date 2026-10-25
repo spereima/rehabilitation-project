@@ -111,8 +111,8 @@ Both final models were evaluated on the same independent test set containing six
 
 | Model | Test MAE |
 |---|---:|
-| SILS | 14.04° |
-| Semantic Segmentation | 12.14° |
+| SILS | 12.788° |
+| Semantic Segmentation | 11.504° |
 
 The reported values are frame-weighted mean absolute errors across the evaluated camera viewpoints. Semantic Segmentation achieved a lower average error than SILS, indicating that body-region information can improve joint-angle prediction compared with silhouette-only representations.
 
