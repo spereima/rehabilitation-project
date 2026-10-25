@@ -20,7 +20,7 @@ WEIGHT = DEFAULT_WEIGHT
 TRUST_LEGACY_CACHE = True
 ANGLES = {'leg': ('hip_angle_2d', 'knee_angle', 'ankle_angle'), 'arm': ('shoulder_angle_2d', 'elbow_angle', 'wrist_angle')}
 ROM_COLUMNS = [f'{side}_{angle}_rom' for side in ('left', 'right') for limb in ANGLES for angle in ANGLES[limb]]
-
+images = 0
 
 def calculate_rom(df, chosen):
     result = {column: np.nan for column in ROM_COLUMNS}
