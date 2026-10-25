@@ -385,6 +385,7 @@ For the final version, we plan to:
 5. Try to combine the geometric algorithm and the machine learning models into one system. This would allow us to combine joint-angle prediction with active-limb detection, movement tracking and trunk stability analysis. We also want to see whether combining both approaches can improve accuracy and reliability.
 6. Develop a real-time rehabilitation exercise analysis platform that uses a camera to track movements and give users feedback on how they perform exercises, without having to upload videos first.
 7. Improve repetition counting and movement smoothness analysis, test them using manually labelled repetitions, and include them in the final version once the results are reliable.
+8. Validate the results with physiotherapists. Develop exercise-quality predictions based on movement characteristics and compare them with physiotherapists' assessments to check how well our system evaluates exercise performance.
 
 ## AI usage
 
