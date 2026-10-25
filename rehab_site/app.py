@@ -86,71 +86,141 @@ def smooth_signal(angles, window=11):
 
 
 def detect_repetitions(frame_ids, angles, fps, min_duration_s=0.7,
-                       prominence_deg=8.0, cycle_type="auto", baseline_frames=12,
-                       return_tolerance_deg=8.0):
-    """Detect baseline -> excursion -> baseline cycles, including clip boundaries.
+                       prominence_deg=8.0, cycle_type="auto",
+                       baseline_frames=12, return_tolerance_deg=8.0):
+    """Detect full excursions from a resting position and back."""
+    from scipy.ndimage import gaussian_filter1d, median_filter
 
-    Baseline is estimated from the beginning of each contiguous sequence.
-    Returns complete cycles, incomplete excursions and the chosen direction.
-    """
     frames = np.asarray(frame_ids, dtype=int)
     values = np.asarray(angles, dtype=float)
+
     good = np.isfinite(values)
     frames, values = frames[good], values[good]
+
     if len(frames) < 9:
         return [], [], None
 
-    splits = np.split(np.arange(len(frames)),
-                      np.flatnonzero(np.diff(frames) != 1) + 1)
-    complete, incomplete, chosen_directions = [], [], []
+    splits = np.split(
+        np.arange(len(frames)),
+        np.flatnonzero(np.diff(frames) != 1) + 1
+    )
+
+    complete = []
+    incomplete = []
+    directions = []
+
+    min_frames = max(1, round(min_duration_s * fps))
+
     for indices in splits:
         if len(indices) < 9:
             continue
-        fr, v = frames[indices], values[indices]
-        smooth = smooth_signal(v, window=15)
-        count = max(1, min(int(baseline_frames), len(smooth)))
-        baseline = float(np.median(smooth[:count]))
+
+        fr = frames[indices]
+        v = values[indices]
+
+        median_window = max(3, round(fps * 0.2))
+        if median_window % 2 == 0:
+            median_window += 1
+
+        smooth = median_filter(v, size=median_window)
+        smooth = gaussian_filter1d(
+            smooth,
+            sigma=max(1.0, fps * 0.25)
+        )
+
+        baseline_count = max(
+            1, min(int(baseline_frames), len(smooth))
+        )
+        baseline = float(np.median(smooth[:baseline_count]))
+
         difference = smooth - baseline
-        threshold = float(prominence_deg)
-        tolerance = min(float(return_tolerance_deg), threshold * 0.75)
-        min_frames = max(1, round(min_duration_s * fps))
 
         if cycle_type == "valley":
             direction = 1
         elif cycle_type == "peak":
             direction = -1
         else:
-            first_up = np.flatnonzero(difference >= threshold)
-            first_down = np.flatnonzero(difference <= -threshold)
-            up = first_up[0] if len(first_up) else len(fr) + 1
-            down = first_down[0] if len(first_down) else len(fr) + 1
-            if up == down:
-                continue
-            direction = 1 if up < down else -1
-        chosen_directions.append(direction)
+            upward = np.percentile(difference, 95)
+            downward = -np.percentile(difference, 5)
+
+            direction = 1 if upward >= downward else -1
 
         excursion = direction * difference
-        start = 0
+
+        amplitude = float(
+            np.percentile(excursion, 95)
+        )
+
+        if amplitude < prominence_deg:
+            continue
+
+        directions.append(direction)
+
+        enter_threshold = max(
+            float(prominence_deg),
+            amplitude * 0.4
+        )
+
+        peak_threshold = max(
+            float(prominence_deg),
+            amplitude * 0.65
+        )
+
+        return_threshold = min(
+            float(return_tolerance_deg),
+            amplitude * 0.15
+        )
+
         active = False
-        for i in range(1, len(fr)):
+        start = 0
+        maximum = 0.0
+
+        for i in range(len(fr)):
+            current = excursion[i]
+
             if not active:
-                if excursion[i] >= threshold:
+                if current >= enter_threshold:
                     active = True
-            else:
-                if abs(difference[i]) <= tolerance:
-                    if fr[i] - fr[start] >= min_frames:
-                        complete.append((int(fr[start]), int(fr[i])))
+                    maximum = current
+
                     start = i
+                    while (
+                        start > 0
+                        and excursion[start - 1] > return_threshold
+                    ):
+                        start -= 1
+
+            else:
+                maximum = max(maximum, current)
+
+                if current <= return_threshold:
+                    duration = fr[i] - fr[start]
+
+                    if (
+                        duration >= min_frames
+                        and maximum >= peak_threshold
+                    ):
+                        complete.append(
+                            (int(fr[start]), int(fr[i]))
+                        )
+
                     active = False
-        if active:
-            incomplete.append((int(fr[start]), int(fr[-1])))
+                    maximum = 0.0
+
+        if active and maximum >= peak_threshold:
+            incomplete.append(
+                (int(fr[start]), int(fr[-1]))
+            )
 
     if cycle_type == "auto":
-        chosen = "valley" if chosen_directions and chosen_directions[0] == 1 else "peak" if chosen_directions else None
+        if directions:
+            chosen = "valley" if directions[0] == 1 else "peak"
+        else:
+            chosen = None
     else:
         chosen = cycle_type
-    return complete, incomplete, chosen
 
+    return complete, incomplete, chosen
 
 def repetition_plot(results, boundaries, reference, incomplete=None):
     plot_cols = ["frame_id", "time_s", "angle_pred"]
