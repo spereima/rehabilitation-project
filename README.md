@@ -377,6 +377,9 @@ In our local performance tests, processing 480 videos took approximately 6 minut
 ## Limitations and next steps
 
 - Models may overfit to visually similar frames; subject-wise validation and camera-specific comparisons are important.
+- The models are trained and validated on a relatively small number of participants (21 for development and 6 for independent testing), which may limit generalisation to a broader population.
+- The models predict only one angle per frame instead of separate angles for different joints, which can make both joint-angle prediction and detailed movement analysis inaccurate for some exercises.
+- The models may give different angle predictions depending on the camera viewpoint (additional evaluation on self-recorded videos showed inconsistent predictions between cameras for some unseen exercises).
 - Segmentation mistakes and occlusion affect geometric keypoints and angle estimates.
 - The geometric pipeline needs manually annotated 2D joint locations and exercise-specific movement labels to establish accuracy beyond detection coverage.
 - A 2D camera view may not capture out-of-plane movement or compensation correctly.
