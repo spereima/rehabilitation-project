@@ -1,7 +1,7 @@
 {
     "modality": "semantic_segmentation",
     "test_frames": 223335,
-    "test_mae": 11.035877003451807,
-    "test_rmse": 16.086142747437954,
+    "test_mae": 11.503560963575968,
+    "test_rmse": 16.347838731130285,
     "checkpoint_epoch": 3
 }

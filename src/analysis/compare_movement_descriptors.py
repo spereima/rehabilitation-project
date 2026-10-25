@@ -8,13 +8,15 @@ import pandas as pd
 from scipy.signal import find_peaks
 
 
+RESULTS_ROOT = Path(
+    "/content/drive/MyDrive/rehabilitation-project-data"
+    "/cross_validation/output/ucophyrehab_final/test_results"
+)
+
 PREDICTION_FILES = {
-    "sils": Path(
-        "output/ucophyrehab_final/test_results/sils/all_predictions.csv"
-    ),
-    "semantic_segmentation": Path(
-        "output/ucophyrehab_final/test_results/"
-        "semantic_segmentation/all_predictions.csv"
+    "sils": RESULTS_ROOT / "sils" / "all_predictions.csv",
+    "semantic_segmentation": (
+        RESULTS_ROOT / "semantic_segmentation" / "all_predictions.csv"
     ),
 }
 

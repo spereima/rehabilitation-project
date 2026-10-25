@@ -5,9 +5,9 @@ subject,signed_error,modality
 3,-4.452497569578073,sils
 7,-4.035581864150926,sils
 8,-3.4905637829421554,sils
-0,-5.684634218509422,semantic_segmentation
-20,2.603576225970242,semantic_segmentation
-23,-0.014991080976651623,semantic_segmentation
-3,-8.983442142298873,semantic_segmentation
-7,-4.074220707700211,semantic_segmentation
-8,-0.08530875460957017,semantic_segmentation
+0,-5.692415903115357,semantic_segmentation
+20,2.179121787865305,semantic_segmentation
+23,-1.2095232605934252,semantic_segmentation
+3,-10.378244019054193,semantic_segmentation
+7,-6.027395712393012,semantic_segmentation
+8,-2.2266470002685135,semantic_segmentation
