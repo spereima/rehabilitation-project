@@ -143,6 +143,18 @@ The algorithm also calculates joint-level ROM and detects sudden changes in esti
 
 Detailed evaluation results are available in `all_summary.csv`. To assess the accuracy of the geometric algorithm, we also plan to compare its estimated joint positions with manually labelled keypoints.
 
+
+## Geometric Movement Analysis — Visual Examples
+
+Examples of active limb detection, joint angle estimation, and trunk stability analysis.
+
+<p align="center">
+  <img src="results/geometric_algorithm_results/examples_gifs/24_14_cam2_preview.gif" width="48%">
+  <img src="results/geometric_algorithm_results/examples_gifs/20_01_cam0_preview.gif" width="48%">
+</p>
+
+
+
 #### Interactive application
 
 We developed a Streamlit application to demonstrate the trained models and analyse rehabilitation exercises.
