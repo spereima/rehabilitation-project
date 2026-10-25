@@ -147,7 +147,10 @@ The application allows users to upload preprocessed SILS or Semantic Segmentatio
 
 The application currently supports uploaded preprocessed MP4 videos rather than raw camera footage or real-time camera input.
 
-**Demo:**
+The videos below show how our Streamlit application works.
+
+- [Silhouette (SILS) Model Demo](rehab_site/demo/demo1.mp4)
+- [Semantic Segmentation Model Demo](rehab_site/demo/demo2.mp4)
 
 ## Installation
 
