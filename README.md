@@ -127,17 +127,21 @@ We generated CSV summaries and visualisations to examine model behaviour across 
 
 #### Geometric movement analysis
 
-The current geometric results combine the movement-detection and multi-camera improvements in one output. We do not report separate algorithm versions here. The available results cover 480 videos: 6 participants, 16 exercises and 5 camera views per exercise.
+We evaluated the geometric algorithm on all 27 participants, covering 16 rehabilitation exercises and five camera viewpoints, for a total of 2,160 videos.
+
+The evaluation focused on active-limb detection, joint-angle estimation, range of motion (ROM), trunk stability and movement diagnostics. We analysed the results across exercises, participants and camera views to identify cases where the algorithm still has difficulties detecting body parts and tracking movement.
 
 | Measure | Result |
 |---|---:|
-| Mean coverage of selected-limb geometry | 78.3% |
-| Mean trunk-orientation coverage | 99.1% |
-| Mean proportion of stable trunk frames among frames with a known status, averaged across videos | 83.9% |
+| Mean coverage of selected-limb geometry | 77.85% |
+| Mean trunk-orientation coverage | 99.20% |
+| Mean proportion of stable trunk frames among frames with a known status, averaged across videos | 84.82% |
 
-These are descriptive diagnostics calculated from `video_summary.csv`, with each video contributing equally. Coverage tells us how often a measurement was available, not whether the keypoint or angle was anatomically correct. The trunk stability percentage depends on the chosen threshold and viewing angle; it is not a clinical assessment. Detailed per-video results and missing-data reasons are available in `video_summary.csv` and `missing_reasons.csv`.
+These results are descriptive metrics calculated from `video_summary.csv`, with each video contributing equally. Coverage indicates how often the algorithm produces measurements, but does not confirm the accuracy of the estimated keypoints or joint angles. Trunk stability is assessed using a predefined threshold and depends on the camera viewpoint, so it should not be interpreted as a clinical assessment.
 
-The geometric pipeline also reports joint-level ROM and angle-jump counts. We also experimented with repetition counting and movement smoothness, but these still need further improvements to produce reliable results. For now, we have left them out of the current version and plan to refine and include them in the final implementation.
+The algorithm also calculates joint-level ROM and detects sudden changes in estimated angles. We experimented with repetition counting and movement smoothness analysis, but these features still need improvement and validation before being included in the final implementation.
+
+Detailed evaluation results are available in `all_summary.csv`. To assess the accuracy of the geometric algorithm, we also plan to compare its estimated joint positions with manually labelled keypoints.
 
 #### Interactive application
 
