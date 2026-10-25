@@ -9,7 +9,6 @@ from multiprocessing import Manager
 from concurrent.futures import ProcessPoolExecutor
 from results import make_summary
 from pipeline import process_video
-from visualization import save_frames
 from movement import motion_scores, local_choice, vote_rescue, annotate, with_weight
 from config import (BASE, OUTPUT as SOURCE_OUTPUT, CAMERAS, WORKERS, SAVE_IMAGES, DEFAULT_WEIGHT, COLOR_TOLERANCE, MIN_AREA,
     MAX_JUMP_REL_SCALE, MAX_GAP_FRAMES, ANGLE_JUMP_DEG, SKIP_S, WINDOW_S, BASELINE_S, COLORS, SUBJECTS, EXERCISES)
@@ -141,7 +140,6 @@ def job(task):
 
         df, chosen = annotate(item['df'], item, common)
         df['subject'], df['exercise'], df['camera'] = subject, exercise, cam
-        images = save_frames(video, df, folder / 'frames') if SAVE_IMAGES else 0
         summary, diagnostics = make_summary(df, chosen, subject, exercise, cam, item, common, images)
 
         for key in ('repetitions_total', 'exercise_repetitions', 'repetitions_by_side', 'confirmed_by_both', 'confirmed_by_one',
