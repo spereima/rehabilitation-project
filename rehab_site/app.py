@@ -163,7 +163,7 @@ def repetition_plot(results, boundaries, reference, incomplete=None):
         x=alt.X("time_s:Q", title="Час (с)"),
         y=alt.Y("Кут (°):Q", scale=alt.Scale(zero=False)),
         color=alt.Color("Серія:N", scale=alt.Scale(
-            domain=["angle_gt", "angle_pred"], range=["#4472a8", "#d57a42"])))
+            domain=["angle_gt", "angle_pred"], range=["#907fdd", "#f05050"])))
     if not boundaries and not incomplete:
         return line.properties(height=320).interactive()
     marks = []
@@ -176,7 +176,7 @@ def repetition_plot(results, boundaries, reference, incomplete=None):
     marks = pd.DataFrame(marks).drop_duplicates()
     rules = alt.Chart(marks).mark_rule(strokeDash=[5,4], opacity=0.7).encode(
         x="time_s:Q", color=alt.Color("Тип:N", scale=alt.Scale(
-            domain=["Повне", "Неповне"], range=["#6d8d75", "#b76b6b"])))
+            domain=["Повне", "Неповне"], range=["#907fdd", "#f05050"])))
     return (line + rules).properties(height=320).interactive()
 
 
@@ -368,8 +368,8 @@ if "analysis" in st.session_state:
     if gt_available:
         st.subheader("Порівняння прогнозу з еталонними значеннями")
         st.caption(
-            "Синя лінія — еталонний кут із датасету, "
-            "помаранчева — кут, визначений моделлю."
+            "Фіолетова лінія — еталонний кут із датасету, "
+            "червона — кут, визначений моделлю."
         )
 
         comparison = results[["time_s", "angle_gt", "angle_pred"]].copy()
@@ -399,7 +399,7 @@ if "analysis" in st.session_state:
                 "Джерело:N",
                 scale=alt.Scale(
                     domain=["Еталонний кут", "Прогноз моделі"],
-                    range=["#2563eb", "#f97316"]
+                    range=["#907fdd", "#f05050"]
                 ),
                 legend=alt.Legend(title=None)
             ),
