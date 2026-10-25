@@ -149,10 +149,9 @@ The application currently supports uploaded preprocessed MP4 videos rather than 
 
 The videos below show how our Streamlit application works.
 
-![Silhouette Demo](rehab_site/demo/silhouette_demo.gif)
+!![Silhouette demo](rehab_site/demo/demo1.gif)
 
-![Semantic Segmentation Demo](rehab_site/demo/semantic_segmentation_demo.gif)
-
+![Semantic Segmentation Demo](rehab_site/demo/demo2.gif)
 
 
 ## Installation
