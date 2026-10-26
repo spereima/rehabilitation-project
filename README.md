@@ -152,8 +152,10 @@ Detailed evaluation results are available in `all_summary.csv`. To assess the ac
 
 Examples of active limb detection, joint angle estimation, and trunk stability analysis.
 
-![Exercise 14 — Arm movement](results/geometric_algorithm_results/examples_gifs/24_14_cam2_preview.gif)
-![Exercise 01 — Leg movement](results/geometric_algorithm_results/examples_gifs/20_01_cam0_preview.gif)
+<p align="center">
+  <img src="results/geometric_algorithm_results/examples_gifs/24_14_cam2_preview.gif" width="45%" />
+  <img src="results/geometric_algorithm_results/examples_gifs/20_01_cam0_preview.gif" width="45%" />
+</p>
 
 #### Interactive application
 
