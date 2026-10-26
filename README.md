@@ -39,7 +39,7 @@ Our geometric pipeline primarily uses semantic segmentation videos. The model ex
 
 ### Visual representations
 
-The dataset includes several visual representations of rehabilitation exercises, including RGB recordings, silhouettes, semantic segmentation, TV-L1 and GMFlow optical flow.
+The dataset includes several visual representations of rehabilitation exercises, including silhouettes, semantic segmentation, TV-L1 and GMFlow optical flow.
 
 ![UCOPhyRehab++ visual representations](img/modalities_sample.png)
 
@@ -125,6 +125,10 @@ In addition to frame-level accuracy, we analysed predicted movement trajectories
 
 We generated CSV summaries and visualisations to examine model behaviour across participants, exercises, and camera viewpoints.
 
+##### Evaluation on self-recorded videos
+
+We also recorded our own rehabilitation exercise videos and converted them into silhouettes, with each exercise filmed simultaneously from two camera viewpoints. We evaluated the pretrained SILS model without retraining to examine its performance on recordings collected outside the original dataset. The key finding was that angle predictions varied across camera viewpoints, indicating limited cross-view consistency on unseen exercises. These exploratory results highlight a limitation in the model's ability to generalise.
+
 #### Geometric movement analysis
 
 We evaluated the geometric algorithm on all 27 participants, covering 16 rehabilitation exercises and five camera viewpoints, for a total of 2,160 videos.
@@ -148,12 +152,8 @@ Detailed evaluation results are available in `all_summary.csv`. To assess the ac
 
 Examples of active limb detection, joint angle estimation, and trunk stability analysis.
 
-<p align="center">
-  <img src="results/geometric_algorithm_results/examples_gifs/24_14_cam2_preview.gif" width="48%">
-  <img src="results/geometric_algorithm_results/examples_gifs/20_01_cam0_preview.gif" width="48%">
-</p>
-
-
+![Exercise 14 — Arm movement](results/geometric_algorithm_results/examples_gifs/24_14_cam2_preview.gif)
+![Exercise 01 — Leg movement](results/geometric_algorithm_results/examples_gifs/20_01_cam0_preview.gif)
 
 #### Interactive application
 
