@@ -145,8 +145,7 @@ These results are descriptive metrics calculated from `video_summary.csv`, with 
 
 The algorithm also calculates joint-level ROM and detects sudden changes in estimated angles. We experimented with repetition counting and movement smoothness analysis, but these features still need improvement and validation before being included in the final implementation.
 
-Detailed evaluation results are available in `all_summary.csv`. To assess the accuracy of the geometric algorithm, we also plan to compare its estimated joint positions with manually labelled keypoints.
-
+Detailed evaluation results are available in [`results/geometric_algorithm_results/all_summary.csv`](results/geometric_algorithm_results/all_summary.csv). We also hope to create a small dataset of manually annotated keypoints to evaluate the accuracy of the geometric algorithm, if possible.
 
 ## Geometric Movement Analysis — Visual Examples
 
@@ -300,7 +299,7 @@ The complete experimental workflow, including the Hydra configurations and execu
 
 The geometric algorithm runs separately from the Hydra-based models. It uses colour-coded semantic segmentation videos, not raw RGB footage. Set `BASE`, `OUTPUT`, `SUBJECTS`, `EXERCISES` and `CAMERAS` in `src/geometric_algorithm/config.py` for your local data before running it. The input layout is `BASE/<participant>/<exercise>/cam0.mp4` (and likewise for other cameras). Install the dependencies in `src/geometric_algorithm/requirements.txt` where applicable.
 
-It saves per-frame and per-video CSV measurements and diagnostics. Images and annotated videos are optional local outputs, not included in the repository at present. For runs that import `visualization`, make sure the local `visualization.py` module is available, even when image saving is disabled.
+The algorithm saves per-frame and per-video CSV results, including measurements and diagnostics. Visualisations and annotated videos can also be generated locally, but the scripts used to create them are not included in the repository.
 
 To run the algorithm from the project root, use:
 
@@ -311,7 +310,8 @@ python src/geometric_algorithm/run.py
 ## Repository structure
 
 ```text
-.
+
+rehabilitation-project/
 ├── conf/
 │   ├── data/
 │   ├── experiment/
@@ -319,45 +319,48 @@ python src/geometric_algorithm/run.py
 │   ├── model/
 │   ├── training/
 │   └── default.yaml
-├── data/
-│   ├── manifests/
-│   └── splits/
-├── scripts/
-│   ├── build_manifest.sh
-│   ├── prepare_dataset.sh
-│   ├── train.sh
-│   └── test.sh
-│   └── analyze_all_cameras.py
-│   └── build_cross_camera_manifests.py
-│   └── extract_test_cameras.py
-├── src/
-│   ├── cli/
-│   ├── data/
-│   ├── logging/
-│   ├── loss/
-│   ├── metric/
-│   ├── model/
-│   ├── normalization/
-│   ├── analysis/
-│   ├── geometric_algorithm/
-│   └── utils/
-├── requirements.txt
-├── notebooks/
-│   └── cross_validation_sils_segm.ipynb
+├── dataset_check_frames/        
+├── img/                          
 ├── models/
 │   ├── sils/
-│   │   ├── epoch_3.pth
-│   │   └── final_train_norm_params.json
 │   └── semantic_segmentation/
-│       ├── epoch_3.pth
-│       └── final_train_norm_params.json
-├── results/
+├── notebooks/
+│   ├── cross_validation_sils_segm.ipynb
+│   └── cross_view_evaluation.ipynb
 ├── rehab_site/
-│   └── app.py
+│   ├── demo/
+│   ├── app.py
 │   └── requirements.txt
+├── results/    
+│   ├── all_cameras_analysis/
+│   ├── cross_validation/
+│   ├── final_test/
+│   ├── full_dataset/
+│   ├── geometric_algorithm_results/
+│   │   ├── all_summary.csv
+│   │   └── examples_gifs/
+│   ├── modality_comparison/
+│   ├── own_videos/
+│   ├── semantic_segmentation_split1_01_05_cam0/
+│   └── sils_split1_01_05_cam0/
+├── scripts/                      
+├── src/
+│   ├── analysis/                 
+│   ├── cli/
+│   ├── data/ 
+│   ├── geometric_algorithm/
+│   ├── logging/              
+│   ├── loss/                 
+│   ├── metric/                   
+│   ├── models/                   
+│   ├── normalization/            
+│   └── utils/                    
+├── requirements.txt
+├── requirements.yaml
+├── requirements_mac.txt
+├── resize_dataset.py
 └── README.md
 ```
-
 ### Geometric algorithm
 
 The geometric algorithm consists of several modules:
@@ -373,9 +376,8 @@ The geometric algorithm consists of several modules:
 - `pipeline.py`: manages video processing.
 - `results.py`: saves processing results.
 - `smoothness.py`: experimental movement-smoothness calculations.
-- `visualize_results.py`: local visualisation helper.
 
-The algorithm saves per-video `frames.csv`, `summary.csv` and `diagnostics.csv`, as well as aggregate `video_summary.csv` and `missing_reasons.csv`. It may also produce local plots, frame snapshots and annotated videos.
+The algorithm saves per-video `frames.csv`, `summary.csv` and `diagnostics.csv`, as well as aggregate `video_summary.csv` and `missing_reasons.csv` in the configured local output directory (`src/geometric_algorithm/results_all/` by default). Published evaluation results are stored separately in `results/geometric_algorithm_results/`.
 
 ### Performance optimisation
 
@@ -404,14 +406,13 @@ In our local performance tests, processing 480 videos took approximately 6 minut
 - Generalisation to newly recorded videos requires consistent camera setup and external testing.
 
 For the final version, we plan to:
-1. Add a demo showing how both algorithms work.
-2. Check the accuracy of the geometric algorithm using manually labelled keypoints.
-3. Improve the geometric algorithm's performance on exercises where it still has problems.
-4. Test the models on other visual representations, including TV-L1 and GMFlow (optical flow), and compare the results with Silhouette and Semantic Segmentation.
-5. Try to combine the geometric algorithm and the machine learning models into one system. This would allow us to combine joint-angle prediction with active-limb detection, movement tracking and trunk stability analysis. We also want to see whether combining both approaches can improve accuracy and reliability.
-6. Develop a real-time rehabilitation exercise analysis platform that uses a camera to track movements and give users feedback on how they perform exercises, without having to upload videos first.
-7. Improve repetition counting and movement smoothness analysis, test them using manually labelled repetitions, and include them in the final version once the results are reliable.
-8. Validate the results with physiotherapists. Develop exercise-quality predictions based on movement characteristics and compare them with physiotherapists' assessments to check how well our system evaluates exercise performance.
+1. Check the accuracy of the geometric algorithm using manually labelled keypoints.
+2. Improve the geometric algorithm's performance on exercises where it still has problems.
+3. Test the models on other visual representations, including TV-L1 and GMFlow (optical flow), and compare the results with Silhouette and Semantic Segmentation.
+4. Try to combine the geometric algorithm and the machine learning models into one system. This would allow us to combine joint-angle prediction with active-limb detection, movement tracking and trunk stability analysis. We also want to see whether combining both approaches can improve accuracy and reliability.
+5. Develop a real-time rehabilitation exercise analysis platform that uses a camera to track movements and give users feedback on how they perform exercises, without having to upload videos first.
+6. Improve repetition counting and movement smoothness analysis, test them using manually labelled repetitions, and include them in the final version once the results are reliable.
+7. Validate the results with physiotherapists. Develop exercise-quality predictions based on movement characteristics and compare them with physiotherapists' assessments to check how well our system evaluates exercise performance.
 
 ## AI usage
 
