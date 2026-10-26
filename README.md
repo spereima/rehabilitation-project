@@ -154,7 +154,7 @@ Examples of active limb detection, joint angle estimation, and trunk stability a
 
 <p align="center">
   <img src="results/geometric_algorithm_results/examples_gifs/24_14_cam2_preview.gif" width="45%" />
-  <img src="results/geometric_algorithm_results/examples_gifs/20_01_cam0_preview.gif" width="45%" />
+  <img src="results/geometric_algorithm_results/examples_gifs/20_01_cam1_preview.gif" width="45%" />
 </p>
 
 #### Interactive application
