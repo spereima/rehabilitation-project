@@ -16,7 +16,7 @@ project:
 
 validation:
   enabled: true
-  every_n_epochs: 10
+  every_n_epochs: 1
 
 metrics: ["mae", "rmse"] # Output metrics for train, validation and test
 

@@ -36,7 +36,7 @@ def main(cfg: DictConfig):
     train_log_file = os.path.join(train_log_path, "train_log.txt")
     os.makedirs(train_log_path, exist_ok=True)
     # Open train_log.txt file
-    sys.stdout = open(train_log_file, "w")
+    sys.stdout = open(train_log_file, "a")
 
     # Print config on screen and log file
     print("CONFIG:\n", OmegaConf.to_yaml(cfg))
@@ -104,34 +104,111 @@ def main(cfg: DictConfig):
     # Loop de entrenamiento
     # best_val_mae = float("inf")
     # for epoch in range(1, cfg.training.epochs + 1):
+    # best_val_mae = float("inf")
+    # start_epoch = 1
+
+    # patience = 3
+    # epochs_without_improvement = 0
+    # min_delta = 0.01
+
+    # checkpoint_path = os.path.join(
+    #     "output",
+    #     cfg.project.name,
+    #     cfg.data.modality,
+    #     cfg.data.split_name,
+    #     cfg.project.run_name,
+    #     "checkpoints",
+    #     "best.pth"
+    # )
+
+    # if os.path.exists(checkpoint_path):
+    #     checkpoint = torch.load(
+    #         checkpoint_path,
+    #         map_location=device,
+    #         weights_only=False
+    #     )
+
+    #     model.load_state_dict(checkpoint["model_state_dict"])
+    #     opt.load_state_dict(checkpoint["optimizer_state_dict"])
+    #     scaler.load_state_dict(checkpoint["scaler_state_dict"])
+
+    #     start_epoch = checkpoint["epoch"] + 1
+    #     best_val_mae = checkpoint["best_val_mae"]
+
+    #     print(f"Resuming training from epoch {start_epoch}")
+    
     best_val_mae = float("inf")
     start_epoch = 1
 
-    checkpoint_path = os.path.join(
+    patience = 3
+    min_delta = 0.01
+    epochs_without_improvement = 0
+
+    checkpoint_dir = os.path.join(
         "output",
         cfg.project.name,
         cfg.data.modality,
         cfg.data.split_name,
         cfg.project.run_name,
-        "checkpoints",
-        "best.pth"
+        "checkpoints"
     )
 
-    if os.path.exists(checkpoint_path):
+    os.makedirs(checkpoint_dir, exist_ok=True)
+
+    last_checkpoint_path = os.path.join(
+        checkpoint_dir, "last.pth"
+    )
+
+    best_checkpoint_path = os.path.join(
+        checkpoint_dir, "best.pth"
+    )
+
+    if os.path.exists(last_checkpoint_path):
         checkpoint = torch.load(
-            checkpoint_path,
+            last_checkpoint_path,
             map_location=device,
             weights_only=False
         )
 
-        model.load_state_dict(checkpoint["model_state_dict"])
-        opt.load_state_dict(checkpoint["optimizer_state_dict"])
-        scaler.load_state_dict(checkpoint["scaler_state_dict"])
+        model.load_state_dict(
+            checkpoint["model_state_dict"]
+        )
+
+        opt.load_state_dict(
+            checkpoint["optimizer_state_dict"]
+        )
+
+        scaler.load_state_dict(
+            checkpoint["scaler_state_dict"]
+        )
 
         start_epoch = checkpoint["epoch"] + 1
         best_val_mae = checkpoint["best_val_mae"]
 
-        print(f"Resuming training from epoch {start_epoch}")
+        epochs_without_improvement = checkpoint[
+            "epochs_without_improvement"
+        ]
+
+        print(
+            f"Resuming training from epoch {start_epoch}"
+        )
+
+        print(
+            f"Best validation MAE: {best_val_mae:.3f}"
+        )
+
+        print(
+            f"Epochs without improvement: "
+            f"{epochs_without_improvement}/{patience}"
+        )
+
+        if epochs_without_improvement >= patience:
+            print("Early stopping already reached.")
+            print("CV_FINISHED")
+            sys.stdout.flush()
+            sys.stdout.close()
+            sys.stdout = sys.__stdout__
+            return
 
     for epoch in range(start_epoch, cfg.training.epochs + 1):
         model.train()
@@ -255,8 +332,9 @@ def main(cfg: DictConfig):
             # current_val_mae = val_running["mae"] / n_val_batches
             
 
-            if current_val_mae < best_val_mae:
+            if current_val_mae < best_val_mae - min_delta:
                 best_val_mae = current_val_mae
+                epochs_without_improvement = 0
 
                 best_ckpt_dir = os.path.join(
                     "output",
@@ -279,6 +357,35 @@ def main(cfg: DictConfig):
                 }, best_ckpt_path)
 
                 print(f"[save] best checkpoint -> {best_ckpt_path}, MAE={best_val_mae:.3f}")
+            else:
+                epochs_without_improvement += 1
+
+                print(
+                    f"[early stopping] No improvement: "
+                    f"{epochs_without_improvement}/{patience}"
+                )
+        checkpoint = {
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": opt.state_dict(),
+            "scaler_state_dict": scaler.state_dict(),
+            "best_val_mae": best_val_mae,
+            "epochs_without_improvement": epochs_without_improvement,
+        }
+
+        temporary_path = last_checkpoint_path + ".tmp"
+
+        torch.save(checkpoint, temporary_path)
+        os.replace(temporary_path, last_checkpoint_path)
+
+        print(f"[save] last checkpoint -> {last_checkpoint_path}")
+
+        if cfg.validation.enabled and epochs_without_improvement >= patience:
+            print(
+                f"[early stopping] Stopped at epoch {epoch}. "
+                f"Best validation MAE: {best_val_mae:.3f}"
+            )
+            break
 
 
 
